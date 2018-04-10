@@ -35,16 +35,10 @@ import static uk.q3c.krail.service.Service.State.STOPPED;
 import static uk.q3c.krail.service.Service.State.STOPPING;
 
 /**
- * The easiest way to provide a {@link Service} is to sub-class either this class or {@link AbstractService}.  For management of dependencies between service,
- * see {@link ServiceGraph}
+ * The easiest way to provide a {@link Service} is to sub-class either this class or {@link AbstractService}.
  * <p>
- * Dedicated start and stop listeners can be used to respond to dependencies changing their state to started or stopped
- * respectively, and are used to respond to state changes in dependencies. service change listeners are fired every
- * time
- * there is a change of state (and is used by the {@link ServiceMonitor})<br>
+ * A {@link ServiceBusMessage} is broadcast at every state change via {@link #messageBus}. The {@link ServiceMonitor} subscribes to those messages.
  * <p>
- * All service events are published on the GlobalBus, and all instances of {@link AbstractService} are subscribed to the GlobalBus; this enables the some of
- * the logic of service dependencies - for example, when a service needs to respond when a service it depends on stops.
  * <p>
  * For the MBassador event bus implementation, it is not necessary to annotate a sub-class of AbstractService with a @Listener, unless you want to subscribe to another event bus as well as the default {@link GlobalMessageBus}
  * <p>
@@ -58,7 +52,6 @@ public abstract class AbstractService implements Service {
     private static Logger log = LoggerFactory.getLogger(AbstractService.class);
     private final transient Translate translate;
     protected State state = INITIAL;
-    private transient RelatedServiceExecutor servicesExecutor; // TODO
     private SerializationSupport serializationSupport;
     private I18NKey descriptionKey;
     private I18NKey nameKey;
@@ -67,12 +60,10 @@ public abstract class AbstractService implements Service {
     private Cause cause;
 
     @Inject
-    protected AbstractService(Translate translate, MessageBus messageBus, RelatedServiceExecutor servicesExecutor, SerializationSupport serializationSupport) {
+    protected AbstractService(Translate translate, MessageBus messageBus, SerializationSupport serializationSupport) {
         super();
         this.translate = translate;
-        this.servicesExecutor = servicesExecutor;
         this.serializationSupport = serializationSupport;
-        servicesExecutor.setService(this);
         this.messageBus = messageBus;
         messageBus.subscribe(this);
     }
@@ -115,7 +106,6 @@ public abstract class AbstractService implements Service {
         log.info("Stopping service: {}", getName());
         setState(STOPPING, cause);
         //boolean dependantsRequiringThisAreStopped
-        servicesExecutor.execute(RelatedServiceExecutor.Action.STOP, cause); // also stop / fail dependants which
         // always require this service
         try {
             doStop();
@@ -203,21 +193,6 @@ public abstract class AbstractService implements Service {
         State beginningState = getState();
         log.info("Starting service: {}", getName());
         setState(STARTING, cause);
-        if (servicesExecutor.execute(RelatedServiceExecutor.Action.START, cause)) {
-            try {
-                doStart();
-                setState(RUNNING, cause);
-                this.cause = cause;
-            } catch (Exception e) {
-                String msg = "Exception occurred while trying to start " + getName();
-                log.error(msg, e);
-                setState(FAILED, Cause.FAILED_TO_START);
-            }
-        } else {
-            //revert to beginning state, as we could not complete
-            setState(beginningState, Cause.DEPENDENCY_FAILED);
-        }
-
         return new ServiceStatus(this, this.state, this.cause);
     }
 
@@ -244,15 +219,6 @@ public abstract class AbstractService implements Service {
         }
     }
 
-    @Override
-    public ServiceStatus dependencyFail() {
-        return stop(Cause.DEPENDENCY_FAILED);
-    }
-
-    @Override
-    public ServiceStatus dependencyStop() {
-        return stop(Cause.DEPENDENCY_STOPPED);
-    }
 
     @Override
     public synchronized I18NKey getDescriptionKey() {

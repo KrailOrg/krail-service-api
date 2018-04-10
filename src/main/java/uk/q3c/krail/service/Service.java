@@ -25,8 +25,7 @@ import uk.q3c.krail.i18n.NamedAndDescribed;
  * creation cycle - the initial configuration through Guice modules, followed by a controlled start to activate /
  * consume resources.
  * <p>
- * The easiest way is to create an implementation is to sub-class either {@link AbstractService}.<br>
- * Dependencies between service shold not be coded directly but use the features described in {@link ServiceGraph}
+ * The easiest way is to create an implementation is to sub-class  {@link AbstractService}.<br>
  * <p>
  * Implementations (even sub-classes of {@link AbstractService} must define a key which when combined with {@link #getInstanceNumber()}, provides a unique
  * identity for this Service.  It is an I18NKey because it is expected that this name will be presented to end users (even if only to application sys
@@ -35,18 +34,17 @@ import uk.q3c.krail.i18n.NamedAndDescribed;
  * When an instance of a {@link Service} implementation is created through Guice, it is automatically registered with
  * the {@link ServiceMonitor}. (This is done through a Guice listener in the  ServicesModule).
  * <p>
- * The AOP code in the ServicesMonitorModule also intercepts the finalize() method, and calls the stop() method to
+ * The AOP code in the {@link ServicesModule} also intercepts the finalize() method, and calls the stop() method to
  * ensure a service is stopped before being finalized.
  * <p>
  * A service should have the following characteristics:
  * <ol>
  * <li>All Services must be instantiated through Guice
- * <li>Other {@link Service} instances which your Service depends on, must be injected through the constructor
  * <li>The constructor must be lightweight and must not require that its dependencies are already started at the time
  * of injection.
  * <li>If the dependency's constructor is lightweight as it should be, it should also be unnecessary to inject a Provider<Service>
  * </ol>
- * Details of the lifecycle can be found at http://krail.readthedocs.org/en/master/devguide-services/
+ * Details of the lifecycle can be found at https://davidsowerby.gitbooks.io/krail-user-guide/content/devguide/devguide-services.html
  *
  * @author David Sowerby
  */
@@ -123,20 +121,6 @@ public interface Service extends NamedAndDescribed {
      */
     boolean isStopped();
 
-    /**
-     * Notify this service that one of its required dependencies has failed
-     *
-     * @return the resultant {@link ServiceStatus}
-     */
-    ServiceStatus dependencyFail();
-
-    /**
-     * Notify this service that one of its required dependencies has stopped
-     *
-     * @return the resultant {@link ServiceStatus}
-     */
-    ServiceStatus dependencyStop();
-
     default ServiceKey getServiceKey() {
         return new ServiceKey(getNameKey());
     }
@@ -168,6 +152,6 @@ public interface Service extends NamedAndDescribed {
     }
 
     enum Cause {
-        FAILED, STOPPED, FAILED_TO_START, FAILED_TO_STOP, DEPENDENCY_STOPPED, STARTED, DEPENDENCY_FAILED, FAILED_TO_RESET, RESET
+        FAILED, STOPPED, FAILED_TO_START, FAILED_TO_STOP, STARTED, FAILED_TO_RESET, RESET
     }
 }

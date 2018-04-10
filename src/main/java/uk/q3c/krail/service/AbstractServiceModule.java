@@ -16,11 +16,9 @@ package uk.q3c.krail.service;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
 import uk.q3c.krail.i18n.I18NKey;
 
-import static com.google.common.base.Preconditions.*;
-import static com.google.inject.multibindings.Multibinder.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A useful base class which can be used where the developer wishes to declare dependencies between Service classes using Guice.
@@ -32,14 +30,12 @@ import static com.google.inject.multibindings.Multibinder.*;
  */
 public abstract class AbstractServiceModule extends AbstractModule {
     TypeLiteral<Class<? extends Service>> serviceClassLiteral;
-    private Multibinder<DependencyDefinition> dependencies;
     //other modules may add to this
     private MapBinder<ServiceKey, Service> registeredServices;
     private MapBinder<ServiceKey, Class<? extends Service>> serviceKeyMap;
 
     @Override
     protected void configure() {
-        dependencies = newSetBinder(binder(), DependencyDefinition.class);
         //use TypeLiteral for one parameter have to use it for both
         serviceClassLiteral = new TypeLiteral<Class<? extends Service>>() {
         };
@@ -48,46 +44,20 @@ public abstract class AbstractServiceModule extends AbstractModule {
         registeredServices = MapBinder.newMapBinder(binder(), ServiceKey.class, Service.class);
         serviceKeyMap = MapBinder.newMapBinder(binder(), serviceKeyLiteral, serviceClassLiteral);
         registerServices();
-        defineDependencies();
     }
 
 
     protected abstract void registerServices();
 
-    protected abstract void defineDependencies();
 
-
-    /**
-     * Define a dependency.  Dependencies added here are injected into {@link ServiceModel}
-     */
-    @SuppressWarnings("Duplicates")
-    protected void addDependency(ServiceKey dependant, ServiceKey dependency, Dependency.Type type) {
-        checkNotNull(dependant);
-        checkNotNull(dependency);
-        checkNotNull(type);
-        configCheck();
-        dependencies.addBinding()
-                .toInstance(new DependencyDefinition(dependant, dependency, type));
-    }
 
     private void configCheck() {
-        if (registeredServices == null || dependencies == null || serviceKeyMap == null) {
+        if (registeredServices == null || serviceKeyMap == null) {
             throw new ServiceConfigurationException("MapBinder and MultiBinder fields cannot be null, have you sub-classed " + this.getClass()
                     .getSimpleName() + " but " +
                     "forgotten to call super.configure():");
         }
     }
-
-    @SuppressWarnings("Duplicates")
-    protected void addDependency(I18NKey dependant, I18NKey dependency, Dependency.Type type) {
-        checkNotNull(dependant);
-        checkNotNull(dependency);
-        checkNotNull(type);
-        configCheck();
-        dependencies.addBinding()
-                .toInstance(new DependencyDefinition(dependant, dependency, type));
-    }
-
 
     /**
      * Each service must be registered so that Guice can instantiate it.  Call this method (or just provide your own bindings) to register a Service.
