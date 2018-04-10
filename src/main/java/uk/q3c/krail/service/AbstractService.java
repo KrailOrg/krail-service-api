@@ -258,4 +258,11 @@ public abstract class AbstractService implements Service {
         messageBus.subscribe(this);
     }
 
+    public SerializationSupport getSerializationSupport() {
+        return serializationSupport;
+    }
+
+    public Translate getTranslate() {
+        return translate;
+    }
 }
