@@ -264,19 +264,48 @@ abstract class AbstractService @Inject protected constructor(
         messageBus.publishSync(ServiceBusMessage(this, previousState, state, cause))
     }
 
-    @Throws(ClassNotFoundException::class, IOException::class)
-    private fun readObject(inputStream: ObjectInputStream) {
-        inputStream.defaultReadObject()
-        log = LoggerFactory.getLogger(AbstractService::class.java)
-        lock = Any()
-        serializationSupport.deserialize(this)
-        messageBus.subscribe(this)
-    }
-
     /**
      * A last resort, should never be needed - environment should ensure that all services are stopped on close down
      */
     protected fun finalize() {
         stop()
+    }
+
+    @Throws(ClassNotFoundException::class, IOException::class)
+    private fun readObject(inputStream: ObjectInputStream) {
+        beforeDeserialization()
+        inputStream.defaultReadObject()
+        beforeTransientInjection()
+        serializationSupport.injectTransientFields(this)
+        afterTransientInjection()
+        serializationSupport.checkForNullTransients()
+        messageBus.subscribe(this)
+    }
+
+
+    /**
+     * By default does nothing but can be overridden to execute code before any other action is taken for deserialization.
+     * It could be used to set exclusions for [serializationSupport]
+     */
+    protected fun beforeDeserialization() {
+
+    }
+
+    /**
+     * Override (but call super) to populate fields before [serializationSupport] injects Guice dependencies.
+     * It could be used to set exclusions for [serializationSupport]
+     */
+    protected fun beforeTransientInjection() {
+        log = LoggerFactory.getLogger(AbstractService::class.java)
+        lock = Any()
+    }
+
+
+    /**
+     * By default does nothing but can be overridden to populate transient fields after [serializationSupport]
+     * has injected Guice dependencies.
+     */
+    protected fun afterTransientInjection() {
+
     }
 }
