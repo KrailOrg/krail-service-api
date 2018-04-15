@@ -286,7 +286,7 @@ abstract class AbstractService @Inject protected constructor(
      * By default does nothing but can be overridden to execute code before any other action is taken for deserialization.
      * It could be used to set exclusions for [serializationSupport]
      */
-    protected fun beforeDeserialization() {
+    protected open fun beforeDeserialization() {
 
     }
 
@@ -294,7 +294,7 @@ abstract class AbstractService @Inject protected constructor(
      * Override (but call super) to populate fields before [serializationSupport] injects Guice dependencies.
      * It could be used to set exclusions for [serializationSupport]
      */
-    protected fun beforeTransientInjection() {
+    protected open fun beforeTransientInjection() {
         log = LoggerFactory.getLogger(AbstractService::class.java)
     }
 
@@ -303,7 +303,7 @@ abstract class AbstractService @Inject protected constructor(
      * By default does nothing but can be overridden to populate transient fields after [serializationSupport]
      * has injected Guice dependencies.
      */
-    protected fun afterTransientInjection() {
+    protected open fun afterTransientInjection() {
 
     }
 }
