@@ -45,7 +45,7 @@ sourceCompatibility = '1.8'
 
 kaytee {
     version{
-        number = "0.14.1.0"
+        number = "0.15.0.0"
     }
 }
 
@@ -54,10 +54,20 @@ bintray {
 }
 
 dependencies {
-    compile 'uk.q3c.krail:krail-i18n-api:0.15.6.0'
-    testCompile 'org.spockframework:spock-guice:1.1-groovy-2.4'
-    testCompile 'cglib:cglib-nodep:3.2.0' // needed for Spock mocking
-    testCompile 'org.mockito:mockito-all:1.10.19'
+    compile 'uk.q3c.krail:krail-i18n-api:0.15.7.0'
+
+
+    testCompile "com.nhaarman:mockito-kotlin:1.5.0"
+    testCompile "org.amshove.kluent:kluent:1.35"
+    testCompile ('org.jetbrains.spek:spek-api:1.1.5'){
+        exclude group: 'org.jetbrains.kotlin'
+    }
+    testRuntime ('org.jetbrains.spek:spek-junit-platform-engine:1.1.5'){
+        exclude group: 'org.junit.platform'
+        exclude group: 'org.jetbrains.kotlin'
+    }
+    testCompile 'org.assertj:assertj-core:3.9.0'
+
 }
 
 idea {
