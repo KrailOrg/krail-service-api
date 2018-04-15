@@ -226,8 +226,6 @@ object AbstractServiceTest : Spek({
                 service.isStopped.shouldNotBeTrue()
             }
         }
-
-
     }
 
 })

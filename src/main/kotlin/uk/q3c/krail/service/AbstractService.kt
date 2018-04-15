@@ -273,5 +273,10 @@ abstract class AbstractService @Inject protected constructor(
         messageBus.subscribe(this)
     }
 
-
+    /**
+     * A last resort, should never be needed - environment should ensure that all services are stopped on close down
+     */
+    protected fun finalize() {
+        stop()
+    }
 }
