@@ -54,8 +54,7 @@ abstract class AbstractService @Inject protected constructor(
 
     @Transient
     private var log = LoggerFactory.getLogger(AbstractService::class.java)
-    @Transient
-    private var lock = Any()
+    private val lock = arrayOfNulls<Any>(0)
 
     override var state = INITIAL
         get() {
@@ -297,7 +296,6 @@ abstract class AbstractService @Inject protected constructor(
      */
     protected fun beforeTransientInjection() {
         log = LoggerFactory.getLogger(AbstractService::class.java)
-        lock = Any()
     }
 
 
