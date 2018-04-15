@@ -284,7 +284,8 @@ abstract class AbstractService @Inject protected constructor(
 
     /**
      * By default does nothing but can be overridden to execute code before any other action is taken for deserialization.
-     * It could be used to set exclusions for [serializationSupport]
+     * It cannot be used to set exclusions for [serializationSupport], as [serializationSupport] will be deserialized
+     * after this call
      */
     protected open fun beforeDeserialization() {
 
