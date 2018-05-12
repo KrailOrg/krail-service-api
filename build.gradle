@@ -11,7 +11,7 @@
  *
  */
 buildscript {
-    ext.kotlin_version = '1.2.31'
+    ext.kotlin_version = '1.2.41'
     ext.kaytee_plugin_version = "0.20.1.0"
     repositories {
         jcenter()
@@ -20,6 +20,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "uk.q3c.kaytee:kaytee-plugin:$kaytee_plugin_version"
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.3'
     }
 }
 
@@ -31,6 +32,7 @@ group = 'uk.q3c.krail'
 
 apply plugin: 'uk.q3c.kaytee'
 apply plugin: "kotlin"
+apply from : "gradle/spek.gradle"
 
 repositories {
     jcenter()
@@ -45,7 +47,7 @@ sourceCompatibility = '1.8'
 
 kaytee {
     version{
-        number = "0.15.3.0"
+        number = "0.15.4.0"
     }
 }
 
@@ -54,18 +56,10 @@ bintray {
 }
 
 dependencies {
-    compile 'uk.q3c.krail:krail-i18n-api:0.15.7.0'
+    compile 'uk.q3c.krail:krail-i18n-api:0.15.9.0'
 
 
-    testCompile "com.nhaarman:mockito-kotlin:1.5.0"
-    testCompile "org.amshove.kluent:kluent:1.35"
-    testCompile ('org.jetbrains.spek:spek-api:1.1.5'){
-        exclude group: 'org.jetbrains.kotlin'
-    }
-    testRuntime ('org.jetbrains.spek:spek-junit-platform-engine:1.1.5'){
-        exclude group: 'org.junit.platform'
-        exclude group: 'org.jetbrains.kotlin'
-    }
+
     testCompile 'org.assertj:assertj-core:3.9.0'
 
 }
